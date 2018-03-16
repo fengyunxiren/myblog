@@ -1,6 +1,6 @@
 from django.urls import path
-from django.views.generic import TemplateView
+from . import views
 
 urlpatterns = [
-    path('permission/', TemplateView.as_view()),
+    path('permission/', views.PermissionView.as_view()),
 ]

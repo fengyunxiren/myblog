@@ -4,7 +4,7 @@ from django.shortcuts import render
 from django.views import View
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.http import JsonResponse
-from django.core.serializers import serialize
+from django.forms.models import model_to_dict
 
 from .models import Article, Permission
 from .utils import status_dict
@@ -42,7 +42,7 @@ class ArticleView(View):
 
 class PermissionView(View):
     def get(self, request):
-        permissions = Permission.objects.all()
-        data = serialize('json', permissions)
+        permissions = Permission.objects.filter(is_delete=False)
+        data = list([model_to_dict(p) for p in permissions])
         ret = status_dict(data)
         return JsonResponse(ret)

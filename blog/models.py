@@ -4,15 +4,18 @@ from django.utils import timezone
 # Create your models here.
 
 
-class User(models.Model):
-    username = models.CharField(unique=True, max_length=128)
-    password = models.CharField(max_length=64)
+class Permission(models.Model):
+    name = models.CharField(max_length=128)
     create_time = models.DateTimeField(auto_now_add=timezone.now())
     update_time = models.DateTimeField(auto_now=timezone.now())
     is_delete = models.BooleanField(default=False)
-    email = models.EmailField()
-    user_info = models.OneToOneField(UserInfo)
-    group = models.ManyToManyField(Group)
+
+
+class Group(models.Model):
+    name = models.CharField(max_length=128)
+    create_time = models.DateTimeField(auto_now_add=timezone.now())
+    update_time = models.DateTimeField(auto_now=timezone.now())
+    is_delete = models.BooleanField(default=False)
     permission = models.ManyToManyField(Permission)
 
 
@@ -26,16 +29,33 @@ class UserInfo(models.Model):
     intruduction = models.CharField(max_length=256, blank=True)
 
 
-class Group(models.Model):
-    name = models.CharField(max_length=128)
+class User(models.Model):
+    username = models.CharField(unique=True, max_length=128)
+    password = models.CharField(max_length=64)
     create_time = models.DateTimeField(auto_now_add=timezone.now())
     update_time = models.DateTimeField(auto_now=timezone.now())
     is_delete = models.BooleanField(default=False)
+    email = models.EmailField()
+    user_info = models.OneToOneField(UserInfo, on_delete=models.CASCADE)
+    group = models.ManyToManyField(Group)
     permission = models.ManyToManyField(Permission)
 
 
-class Permission(models.Model):
-    name = models.CharField(max_length=128)
+class Likes(models.Model):
+    readers = models.IntegerField()
+    like = models.ManyToManyField(User, related_name="like_user")
+    disagree = models.ManyToManyField(User, related_name="disagree_user")
+
+
+class Tags(models.Model):
+    name = models.CharField(max_length=32)
+    create_time = models.DateTimeField(auto_now_add=timezone.now())
+    update_time = models.DateTimeField(auto_now=timezone.now())
+    is_delete = models.BooleanField(default=False)
+
+
+class Category(models.Model):
+    name = models.CharField(max_length=32)
     create_time = models.DateTimeField(auto_now_add=timezone.now())
     update_time = models.DateTimeField(auto_now=timezone.now())
     is_delete = models.BooleanField(default=False)
@@ -46,38 +66,18 @@ class Article(models.Model):
     create_time = models.DateTimeField(auto_now_add=timezone.now())
     update_time = models.DateTimeField(auto_now=timezone.now())
     is_delete = models.BooleanField(default=False)
-    author = models.ForeignKey(User, on_delete=models.CASECADE)
-    category = models.ForeignKey(Category, on_delete=models.CASECADE)
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE)
     tags = models.ManyToManyField(Tags)
     abstract = models.CharField(max_length=512)
     content = models.TextField()
-    likes = models.OneToOneField(Likes)
-
-
-class Category(models.Model):
-    name = models.CharField(max_length=32)
-    create_time = models.DateTimeField(auto_now_add=timezone.now())
-    update_time = models.DateTimeField(auto_now=timezone.now())
-    is_delete = models.BooleanField(default=False)
-
-
-class Tags(models.Model):
-    name = models.CharField(max_length=32)
-    create_time = models.DateTimeField(auto_now_add=timezone.now())
-    update_time = models.DateTimeField(auto_now=timezone.now())
-    is_delete = models.BooleanField(default=False)
+    likes = models.OneToOneField(Likes, on_delete=models.CASCADE)
 
 
 class Commit(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASECADE)
-    article = models.ForeignKey(Article, on_delete=CASECADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    article = models.ForeignKey(Article, on_delete=models.CASCADE)
     create_time = models.DateTimeField(auto_now_add=timezone.now())
     update_time = models.DateTimeField(auto_now=timezone.now())
     is_delete = models.BooleanField(default=False)
     content = models.TextField()
-
-
-class Likes(models.Model):
-    readers = models.IntegerField()
-    agree = models.ManyToManyField(User)
-    disagree = models.ManytoManyField(User)

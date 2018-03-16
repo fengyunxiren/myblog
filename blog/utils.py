@@ -1,5 +1,5 @@
 
-def status_dict(date=None, result=True, status=0, message=None, **kwargs):
+def status_dict(data=None, result=True, status=0, message=None, **kwargs):
     if data is None:
         ret = {
             "result": False,
