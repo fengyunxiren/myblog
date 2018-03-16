@@ -21,7 +21,8 @@ class UserInfo(models.Model):
     update_time = models.DateTimeField(auto_now=timezone.now())
     is_delete = models.BooleanField(default=False)
     nick_name = models.CharField(max_length=128, blank=True)
-    gender = models.CharField(max_length=1, default='s', choices=(('male', 'm'), ('female', 'f'), ('secret', 's')))
+    gender = models.CharField(max_length=1, default='s', choices=(
+        ('male', 'm'), ('female', 'f'), ('secret', 's')))
     intruduction = models.CharField(max_length=256, blank=True)
 
 
