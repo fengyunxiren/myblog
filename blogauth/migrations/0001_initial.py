@@ -9,77 +9,63 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('blogauth', '__first__'),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Article',
+            name='Group',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('title', models.CharField(max_length=128)),
-                ('create_time', models.DateTimeField(auto_now_add=True)),
-                ('update_time', models.DateTimeField(auto_now=True)),
-                ('is_delete', models.BooleanField(default=False)),
-                ('abstract', models.CharField(max_length=512)),
-                ('content', models.TextField()),
-                ('author', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='blogauth.User')),
-            ],
-        ),
-        migrations.CreateModel(
-            name='Category',
-            fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=32)),
+                ('name', models.CharField(max_length=128)),
                 ('create_time', models.DateTimeField(auto_now_add=True)),
                 ('update_time', models.DateTimeField(auto_now=True)),
                 ('is_delete', models.BooleanField(default=False)),
             ],
         ),
         migrations.CreateModel(
-            name='Commit',
+            name='Permission',
+            fields=[
+                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('name', models.CharField(max_length=128, unique=True)),
+                ('create_time', models.DateTimeField(auto_now_add=True)),
+                ('update_time', models.DateTimeField(auto_now=True)),
+                ('is_delete', models.BooleanField(default=False)),
+            ],
+        ),
+        migrations.CreateModel(
+            name='User',
+            fields=[
+                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('username', models.CharField(max_length=128, unique=True)),
+                ('password', models.CharField(max_length=64)),
+                ('create_time', models.DateTimeField(auto_now_add=True)),
+                ('update_time', models.DateTimeField(auto_now=True)),
+                ('is_delete', models.BooleanField(default=False)),
+                ('email', models.EmailField(max_length=254)),
+                ('group', models.ManyToManyField(to='blogauth.Group')),
+                ('permission', models.ManyToManyField(to='blogauth.Permission')),
+            ],
+        ),
+        migrations.CreateModel(
+            name='UserInfo',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('create_time', models.DateTimeField(auto_now_add=True)),
                 ('update_time', models.DateTimeField(auto_now=True)),
                 ('is_delete', models.BooleanField(default=False)),
-                ('content', models.TextField()),
-                ('article', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='blog.Article')),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='blogauth.User')),
-            ],
-        ),
-        migrations.CreateModel(
-            name='Likes',
-            fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('readers', models.IntegerField()),
-                ('disagree', models.ManyToManyField(related_name='disagree_user', to='blogauth.User')),
-                ('like', models.ManyToManyField(related_name='like_user', to='blogauth.User')),
-            ],
-        ),
-        migrations.CreateModel(
-            name='Tags',
-            fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=32)),
-                ('create_time', models.DateTimeField(auto_now_add=True)),
-                ('update_time', models.DateTimeField(auto_now=True)),
-                ('is_delete', models.BooleanField(default=False)),
+                ('nick_name', models.CharField(blank=True, max_length=128)),
+                ('gender', models.CharField(choices=[('male', 'm'), ('female', 'f'), ('secret', 's')], default='s', max_length=1)),
+                ('intruduction', models.CharField(blank=True, max_length=256)),
             ],
         ),
         migrations.AddField(
-            model_name='article',
-            name='category',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='blog.Category'),
+            model_name='user',
+            name='user_info',
+            field=models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to='blogauth.UserInfo'),
         ),
         migrations.AddField(
-            model_name='article',
-            name='likes',
-            field=models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to='blog.Likes'),
-        ),
-        migrations.AddField(
-            model_name='article',
-            name='tags',
-            field=models.ManyToManyField(to='blog.Tags'),
+            model_name='group',
+            name='permission',
+            field=models.ManyToManyField(to='blogauth.Permission'),
         ),
     ]

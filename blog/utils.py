@@ -4,7 +4,7 @@ def status_dict(data=None, result=True, status=0, message=None, **kwargs):
         ret = {
             "result": result,
         }
-        if ret is False:
+        if result is False:
             ret["status"] = status if status != 0 else -1
             ret["message"] = message if message is not None\
                 else "request error!"
