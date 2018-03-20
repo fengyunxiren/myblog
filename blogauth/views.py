@@ -1,4 +1,6 @@
 import logging
+import hashlib
+from mysite.settings import SECRET_KEY
 from django.views import View
 from django.http import JsonResponse
 from django.http import QueryDict
@@ -6,7 +8,7 @@ from .models import Permission, Group, User, UserInfo
 from .utils import status_dict
 from .forms import PermissionForm, PermissionDetailForm
 from .forms import GroupForm, GroupDetailForm
-from .forms import UserForm
+from .forms import UserForm, UserDetailForm, UserInfoDetailForm
 from .forms import DeleteForm
 from .utils import model_to_dict
 
@@ -114,6 +116,10 @@ class ModelManyToManyViewBase(ModelDetailViewBase):
     many_to_many_model = None
     many_to_many_name = None
 
+    def get_filter_dict(self, data):
+        return dict(
+                {key + '__startswith': value for key, value in data.items()})
+
     def get(self, request, id):
         if self.many_to_many_name is None:
             raise NotImplementedError("Method not implemented!")
@@ -139,8 +145,7 @@ class ModelManyToManyViewBase(ModelDetailViewBase):
                                             message=pform.errors))
         data = pform.data.dict()
         try:
-            filter_dict = dict(
-                {key + '__startswith': value for key, value in data.items()})
+            filter_dict = self.get_filter_dict(data)
             filter_dict['is_delete'] = False
             mquerys = self.many_to_many_model.objects.filter(**filter_dict)
             many_list = getattr(q, self.many_to_many_name)
@@ -168,8 +173,7 @@ class ModelManyToManyViewBase(ModelDetailViewBase):
                                             message=pform.errors))
         data = pform.data.dict()
         try:
-            filter_dict = dict(
-                {key + '__startswith': value for key, value in data.items()})
+            filter_dict = self.get_filter_dict(data)
             filter_dict['is_delete'] = False
             mquerys = self.many_to_many_model.objects.filter(**filter_dict)
             many_list = getattr(q, self.many_to_many_name)
@@ -218,152 +222,73 @@ class GroupPermissionView(ModelManyToManyViewBase):
 class UserView(ModelViewBase):
     model = User
     form = UserForm
-    exclude = ['is_delete']
+    exclude = ['is_delete', 'password', 'user_info', 'group', 'permission']
 
-    # def get(self, request):
-    #     users = User.objects.filter(is_delete=False)
-    #     data = list(
-    #         [model_to_dict(u, exclude=['is_delete', 'password'])
-    #          for u in users])
-    #     return JsonResponse(status_dict(data))
-
-    # def post(self, request):
-    #     uform = UserForm(request.POST)
-    #     if not uform.is_valid():
-    #         return JsonResponse(status_dict(result=False,
-    #                                         message=uform.errors))
-    #     try:
-    #         udata = uform.data.dict()
-    #         print(udata)
-    #         user = User(**udata)
-    #         userinfo = UserInfo()
-    #         userinfo.save()
-    #         user.user_info = userinfo
-    #         user.save()
-    #         return JsonResponse(status_dict())
-    #     except Exception as ex:
-    #         log.error("create user error: %s", ex)
-    #         return JsonResponse(status_dict(result=False,
-    #                                         message="Create user failed!"))
-
-
-class UserDetailView(View):
-
-    def get(self, request, id):
-        try:
-            user = User.objects.filter(id=id, is_delete=False)
-            if len(user) == 0:
-                return JsonResponse(status_dict(result=False,
-                                                message="user not exists!"))
-            data = model_to_dict(user[0], exclude=['is_delete', 'password'])
-            return JsonResponse(status_dict(data))
-        except Exception as ex:
-            log.error("get user detail error: %s", ex)
-            return JsonResponse(status_dict(result=False,
-                                            message="get user detail error!"))
-
-    def put(self, request, id):
-        user = User.objects.filter(id=id, is_delete=False)
-        if len(user) == 0:
-            return JsonResponse(status_dict(result=False,
-                                            message="user not exists!"))
-        uform = UserUpdateForm(QueryDict(request.body))
+    def post(self, request):
+        uform = self.form(request.POST)
         if not uform.is_valid():
             return JsonResponse(status_dict(result=False,
                                             message=uform.errors))
-        udata = uform.data.dict()
-        print(udata)
         try:
-            u = user[0]
-            if "password" in udata:
-                u.password = udata.get("password")
-            if "email" in udata:
-                u.email = udata.get("email")
-            u.save()
+            udata = uform.data.dict()
+            udata['password'] = self.password_encrypt(udata.get("password"))
+            user = User(**udata)
+            userinfo = UserInfo()
+            userinfo.save()
+            user.user_info = userinfo
+            user.save()
             return JsonResponse(status_dict())
         except Exception as ex:
-            log.error("update user error: %s", ex)
+            log.error("create user error: %s", ex)
             return JsonResponse(status_dict(result=False,
-                                            message="Update user error!"))
+                                            message="Create user failed!"))
 
-    def delete(self, request, id):
-        user = User.objects.filter(id=id, is_delete=False)
-        if len(user) == 0:
-            return JsonResponse(status_dict(result=False,
-                                            message="user not exists!"))
-        uform = DeleteForm(QueryDict(request.body))
-        if not uform.is_valid():
-            return JsonResponse(status_dict(result=False,
-                                            message=uform.errors))
-        if uform.data.dict().get("real") == "True":
-            user[0].delete()
+    def password_encrypt(self, password):
+        sha256 = hashlib.sha256()
+        sha256.update(password.encode("utf-8"))
+        sha256.update(SECRET_KEY.encode("utf-8"))
+        return sha256.hexdigest()
+
+
+class UserDetailView(ModelDetailViewBase):
+    model = User
+    form = UserDetailForm
+    exclude = ['is_delete', 'password', 'user_info', 'group', 'permission']
+
+
+class UserPermissionView(ModelManyToManyViewBase):
+    model = User
+    many_to_many_model = Permission
+    many_to_many_name = "permission"
+    form = PermissionDetailForm
+    exclude = ['is_delete']
+
+
+class UserGroupView(ModelManyToManyViewBase):
+    model = User
+    many_to_many_model = Group
+    many_to_many_name = "group"
+    form = GroupDetailForm
+    exclude = ['is_delete']
+
+    def get_filter_dict(self, data):
+        return data
+
+
+class UserInfoView(ModelDetailViewBase):
+    model = User
+    form = UserInfoDetailForm
+    exclude = ['is_delete']
+
+    def get_query(self, id):
+        if self.model is None:
+            raise NotImplementedError("Method not implemented!")
+        querys = self.model.objects.filter(id=id, is_delete=False)
+        if len(querys) == 0:
+            return None
         else:
-            user[0].is_delete = True
-            user[0].save()
-        return JsonResponse(status_dict())
-
-
-class UserPermissionView(View):
-
-    def get(self, request, id):
-        try:
-            u = User.objects.filter(id=id, is_delete=False)
-            if len(u) == 0:
-                return JsonResponse(status_dict(result=False,
-                                                message="data not exist!"))
-            udata = model_to_dict(u[0], exclude=['is_delete'])
-            return JsonResponse(status_dict(data=udata.get("permission")))
-        except Exception as ex:
-            log.error("get permission error: %s", ex)
-            return JsonResponse(status_dict(result=False,
-                                            message="get permission error"))
-
-    def post(self, request, id):
-        u = User.objects.filter(id=id, is_delete=False)
-        if len(u) == 0:
-            return JsonResponse(status_dict(result=False,
-                                            message="data not exist!"))
-        pform = GroupPermissionForm(request.POST)
-        if not pform.is_valid():
-            return JsonResponse(status_dict(result=False,
-                                            message=pform.errors))
-        pdata = pform.data.dict()
-        permission = Permission.objects.filter(
-            name__startswith=pdata.get("name", ""))
-        if len(permission) == 0:
-            return JsonResponse(status_dict(
-                result=False,
-                message="permission with name %s not exists!" %
-                pdata.get("name", "")))
-        for n in permission:
-            u[0].permission.add(n)
-        return JsonResponse(status_dict())
+            return querys[0].user_info
 
     def delete(self, request, id):
-        u = User.objects.filter(id=id, is_delete=False)
-        if len(u) == 0:
-            return JsonResponse(status_dict(result=False,
-                                            message="data not exist!"))
-        pform = GroupPermissionForm(QueryDict(request.body))
-        if not pform.is_valid():
-            return JsonResponse(status_dict(result=False,
-                                            message=pform.errors))
-        pdata = pform.data.dict()
-        permission = Permission.objects.filter(
-            name__startswith=pdata.get("name", ""))
-        if len(permission) == 0:
-            return JsonResponse(status_dict(
-                result=False,
-                message="permission with name %s not exists!" %
-                pdata.get("name", "")))
-        for n in permission:
-            u[0].permission.remove(n)
-        return JsonResponse(status_dict())
-
-
-class UserGroupView(View):
-    pass
-
-
-class UserInfoView(View):
-    pass
+        return JsonResponse(status_dict(result=False,
+                                        message="Can not delete!"))

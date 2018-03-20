@@ -10,4 +10,6 @@ urlpatterns = [
     path('user/', views.UserView.as_view()),
     path('user/<int:id>/', views.UserDetailView.as_view()),
     path('user/<int:id>/permission/', views.UserPermissionView.as_view()),
+    path('user/<int:id>/group/', views.UserGroupView.as_view()),
+    path('user/<int:id>/userinfo/', views.UserInfoView.as_view()),
 ]

@@ -33,9 +33,16 @@ class UserForm(ModelForm):
         fields = ["username", "password", "email"]
 
 
-class UserUpdateForm(Form):
+class UserDetailForm(Form):
     password = CharField(max_length=64, blank=True)
     email = EmailField(blank=True)
+
+
+class UserInfoDetailForm(Form):
+    nick_name = CharField(max_length=128, blank=True, default="")
+    gender = CharField(max_length=1, default='s', choices=(
+        ('male', 'm'), ('female', 'f'), ('secret', 's')), blank=True)
+    intruduction = CharField(max_length=256, blank=True, default="")
 
 
 class DeleteForm(Form):
