@@ -40,7 +40,9 @@ def model_to_dict(instance, fields=None, exclude=None):
     """
     opts = instance._meta
     data = {}
-    for f in chain(opts.concrete_fields, opts.private_fields, opts.many_to_many):
+    for f in chain(opts.concrete_fields,
+                   opts.private_fields,
+                   opts.many_to_many):
         if not getattr(f, 'editable', False):
             continue
         if fields and f.name not in fields:
