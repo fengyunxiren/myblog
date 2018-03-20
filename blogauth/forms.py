@@ -1,21 +1,24 @@
 from django.forms import ModelForm, Form
-from django.db.models import CharField
+from django.db.models import CharField, EmailField
 from . import models
 
 
 class PermissionForm(ModelForm):
+
     class Meta:
         model = models.Permission
         fields = ['name', ]
 
 
 class PermissionUpdateForm(ModelForm):
+
     class Meta:
         model = models.Permission
         fields = ['id', 'name']
 
 
 class PermisssionDeleteForm(ModelForm):
+
     class Meta:
         model = models.Permission
         fields = ['id']
@@ -23,6 +26,7 @@ class PermisssionDeleteForm(ModelForm):
 
 
 class GroupForm(ModelForm):
+
     class Meta:
         model = models.Group
         fields = ['name']
@@ -30,12 +34,14 @@ class GroupForm(ModelForm):
 
 
 class GroupUpdateForm(ModelForm):
+
     class Meta:
         model = models.Group
         fields = ['id', 'name']
 
 
 class GroupDeleteForm(ModelForm):
+
     class Meta:
         model = models.Group
         fields = ['id']
@@ -44,3 +50,19 @@ class GroupDeleteForm(ModelForm):
 
 class GroupPermissionForm(Form):
     name = CharField(max_length=128)
+
+
+class UserForm(ModelForm):
+
+    class Meta:
+        model = models.User
+        fields = ["username", "password", "email"]
+
+
+class UserUpdateForm(Form):
+    password = CharField(max_length=64, blank=True)
+    email = EmailField(blank=True)
+
+
+class DeleteForm(Form):
+    real = CharField(max_length=5, default="False", choices=["True", "False"])
