@@ -10,19 +10,8 @@ class PermissionForm(ModelForm):
         fields = ['name', ]
 
 
-class PermissionUpdateForm(ModelForm):
-
-    class Meta:
-        model = models.Permission
-        fields = ['id', 'name']
-
-
-class PermisssionDeleteForm(ModelForm):
-
-    class Meta:
-        model = models.Permission
-        fields = ['id']
-        real = CharField(max_length=5, default="False")
+class PermissionDetailForm(Form):
+    name = CharField(max_length=128, blank=True)
 
 
 class GroupForm(ModelForm):
@@ -33,23 +22,8 @@ class GroupForm(ModelForm):
         permissions = CharField(max_length=128)
 
 
-class GroupUpdateForm(ModelForm):
-
-    class Meta:
-        model = models.Group
-        fields = ['id', 'name']
-
-
-class GroupDeleteForm(ModelForm):
-
-    class Meta:
-        model = models.Group
-        fields = ['id']
-        real = CharField(max_length=5, default="False")
-
-
-class GroupPermissionForm(Form):
-    name = CharField(max_length=128)
+class GroupDetailForm(Form):
+    name = CharField(max_length=128, blank=True)
 
 
 class UserForm(ModelForm):
