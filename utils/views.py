@@ -139,15 +139,24 @@ class ModelManyToManyViewBase(ModelDetailViewBase):
             filter_dict = self.get_filter_dict(data)
             filter_dict['is_delete'] = False
             mquerys = self.many_to_many_model.objects.filter(**filter_dict)
-            many_list = getattr(q, self.many_to_many_name)
-            for m in mquerys:
-                many_list.add(m)
-            q.save()
+            if len(mquerys) == 0:
+                return JsonResponse(status_dict(result=False,
+                                                message="Data not found!"))
+            self.add_or_remove(q, mquerys)
             return JsonResponse(status_dict())
         except Exception as ex:
             log.error("Update data error: %s", ex)
             return JsonResponse(status_dict(result=False,
                                             message="Update data error!"))
+
+    def add_or_remove(self, model, many_model, method="add"):
+        many_list = getattr(model, self.many_to_many_name)
+        for m in many_model:
+            if method == "add":
+                many_list.add(m)
+            elif method == "delete":
+                many_list.remove(m)
+        model.save()
 
     def delete(self, request, id):
         if self.many_to_many_model is None or self.form is None or \
@@ -167,10 +176,10 @@ class ModelManyToManyViewBase(ModelDetailViewBase):
             filter_dict = self.get_filter_dict(data)
             filter_dict['is_delete'] = False
             mquerys = self.many_to_many_model.objects.filter(**filter_dict)
-            many_list = getattr(q, self.many_to_many_name)
-            for m in mquerys:
-                many_list.remove(m)
-            q.save()
+            if len(mquerys) == 0:
+                return JsonResponse(status_dict(result=False,
+                                                message="Data not found!"))
+            self.add_or_remove(q, mquerys, method="delete")
             return JsonResponse(status_dict())
         except Exception as ex:
             log.error("Delete data error: %s", ex)

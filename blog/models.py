@@ -6,7 +6,7 @@ from blogauth import models as amodels
 
 
 class Likes(models.Model):
-    readers = models.IntegerField()
+    readers = models.IntegerField(default=0)
     like = models.ManyToManyField(amodels.User, related_name="like_user")
     disagree = models.ManyToManyField(
         amodels.User, related_name="disagree_user")

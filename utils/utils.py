@@ -43,20 +43,21 @@ def model_to_dict(instance, fields=None, exclude=None):
     for f in chain(opts.concrete_fields,
                    opts.private_fields,
                    opts.many_to_many):
-        if not getattr(f, 'editable', False):
-            continue
+        # if not getattr(f, 'editable', False):
+        #     continue
         if fields and f.name not in fields:
             continue
         if exclude and f.name in exclude:
             continue
         value = f.value_from_object(instance)
         if hasattr(value, "_meta"):
-            data[f.name] = model_to_dict(value, exclude=exclude)
+            data[f.name] = model_to_dict(value, fields=fields, exclude=exclude)
         elif isinstance(value, list):
             tmp_list = []
             for v in value:
                 if hasattr(v, "_meta"):
-                    tmp_list.append(model_to_dict(v, exclude=exclude))
+                    tmp_list.append(
+                        model_to_dict(v, fields=fields, exclude=exclude))
                 else:
                     tmp_list.append(v)
             data[f.name] = tmp_list
