@@ -1,7 +1,7 @@
 <template>
     <el-row type="flex" class="row-bg">
       <el-col :span="4"><div class="grid-content bg-purple">
-          <p class="title">{{ msg }}</p>
+          <p class="header-title">{{ msg }}</p>
       </div></el-col>
       <el-col :span="16"><div class="grid-content bg-purple-light">
         <el-menu :default-active="activeIndex" class="el-menu-demo" mode="horizontal" @select="handleSelect">
@@ -33,7 +33,13 @@ export default {
   name: 'Header',
   data () {
     return {
-      msg: 'Feng\'s blog'
+      msg: 'Feng\'s blog',
+      activeIndex: '1'
+    }
+  },
+  methods: {
+    handleSelect () {
+      console.log('hello')
     }
   }
 }
@@ -44,7 +50,7 @@ export default {
     background-color: #fefffa;
     max-height: 60px;
   }
-  .title {
+  .header-title {
     color: #ea6f6f;
     font-size: 20px;
     text-align: left;
@@ -57,5 +63,7 @@ export default {
     border-color: #ea6f6f;
     vertical-align: bottom;
     text-align: right;
+    margin-left: 60px;
+    margin-top: 10px;
   }
 </style>

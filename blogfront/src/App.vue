@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <el-container>
-      <el-aside width="250px"></el-aside>
+      <el-aside width="19.1%"></el-aside>
       <el-container>
         <el-header>
           <Header></Header>
@@ -10,7 +10,7 @@
           <router-view/>
         </el-main>
       </el-container>
-      <el-aside width="250px"></el-aside>
+      <el-aside width="19.1%"></el-aside>
     </el-container>
   </div>
 </template>
@@ -42,6 +42,6 @@ export default {
     background-color: #f3fdf8;
     color: #333;
     text-align: center;
-    line-height: 800px;
+    min-height: 800px;
   }
 </style>

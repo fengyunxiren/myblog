@@ -103,7 +103,7 @@ class ArticleDetailView(ModelDetailViewBase):
             return JsonResponse(status_dict(result=False,
                                             message="Data not exists!"))
         article.likes.readers += 1
-        article.save()
+        article.likes.save()
         data = model_to_dict(article, fields=self.fields, exclude=self.exclude)
         data['author'] = article.author.username
         data['category'] = article.category.name
