@@ -2,7 +2,7 @@
     <el-card class="box-card">
       <div v-for="article in articles" :key="article.id" class="article">
         <div class="info">
-            <p class="title">{{ article.title }}</p>
+            <p class="title" @click="getArticleDetail(article.id)">{{ article.title }}</p>
             <p class="author">
                 <span>
                     <i class="el-icon-edit-outline"></i>
@@ -84,6 +84,14 @@ export default {
       newString = timeString.replace(/T/, ' ')
       newString = newString.split('.')[0]
       return newString
+    },
+    getArticleDetail (id) {
+      var _this = this
+      _this.id = id
+      setTimeout(function () {
+        console.log(_this.id)
+        _this.$router.push({path: '/articles/' + _this.id})
+      }, 2000)
     }
   }
 }
@@ -111,7 +119,11 @@ export default {
     margin-bottom: 0px;
     color: #ea6f6f;
     font-weight: 500;
-    font-size: 20px
+    font-size: 20px;
+    cursor: pointer;
+  }
+  .title:hover {
+    color: #85a6ff;
   }
   .author {
     margin-top: 15px;
