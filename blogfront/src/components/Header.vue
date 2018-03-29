@@ -23,7 +23,7 @@
         </el-menu>
       </div></el-col>
       <el-col :span="4"><div class="grid-content bg-purple">
-          <el-button class="login" round>login</el-button>
+          <el-button customClass="headerLogin" round>login</el-button>
       </div></el-col>
     </el-row>
 </template>
@@ -34,7 +34,8 @@ export default {
   data () {
     return {
       msg: 'Feng\'s blog',
-      activeIndex: '1'
+      activeIndex: '1',
+      headerLogin: 'header-login'
     }
   },
   methods: {
@@ -57,7 +58,7 @@ export default {
     vertical-align: middle;
     font-weight: 600;
   }
-  .login {
+  .header-login {
     color: #ea6f6f;
     background-color: #fff;
     border-color: #ea6f6f;

@@ -9,18 +9,17 @@
           </span>
           <span>
               <i class="el-icon-time"></i>
-              {{ transDate(article.update_time) }}
+              {{ article.update_time }}
           </span>
       </p>
     </div>
     <mavon-editor class="detail-editor"
       v-model="article.content"
-      :defaultOpen="preview"
+      defaultOpen="preview"
       :subfield="false"
       :editable="false"
       :toolbarsFlag="false"
       :ishljs="true"
-      border-color="#fff"
       ></mavon-editor>
   </div>
 </template>
@@ -41,11 +40,12 @@ export default {
     showArticles () {
       var id = ''
       id = this.$route.params.id
-      this.$http.get('http://127.0.0.1:8000/blog/article/' + id + '/')
+      this.$http.get('/blog/article/' + id + '/')
         .then((response) => {
           var res = JSON.parse(response.bodyText)
           if (res.result === true) {
             this.article = res.data
+            this.article.update_time = this.transDate(this.article.update_time)
           } else {
             this.$message.error('get articles error!')
             console.log(res.message)
