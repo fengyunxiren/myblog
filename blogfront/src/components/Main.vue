@@ -68,7 +68,7 @@ export default {
   },
   methods: {
     showArticles () {
-      this.$http.get('/blog/article/')
+      this.$http.get('http://127.0.0.1:8000/blog/article/')
         .then((response) => {
           var res = JSON.parse(response.bodyText)
           if (res.result === true) {

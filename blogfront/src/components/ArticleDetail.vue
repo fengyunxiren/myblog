@@ -40,7 +40,7 @@ export default {
     showArticles () {
       var id = ''
       id = this.$route.params.id
-      this.$http.get('/blog/article/' + id + '/')
+      this.$http.get('http://127.0.0.1:8000/blog/article/' + id + '/')
         .then((response) => {
           var res = JSON.parse(response.bodyText)
           if (res.result === true) {

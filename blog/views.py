@@ -84,7 +84,7 @@ class ArticleView(ModelViewBase):
             likes.save()
             article.likes = likes
             article.save()
-            return JsonResponse(status_dict())
+            return JsonResponse(status_dict(model_to_dict(article)))
         except Exception as ex:
             log.error("create user error: %s", ex)
             return JsonResponse(status_dict(result=False,
